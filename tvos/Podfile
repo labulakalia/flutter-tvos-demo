@@ -41,7 +41,7 @@ post_install do |installer|
       # set framework search path
       config.build_settings['FRAMEWORK_SEARCH_PATHS'] = "\"#{File.expand_path("..", $PROJECT_DIR)}/ios/Flutter\" $(inherited)"
       config.build_settings["ONLY_ACTIVE_ARCH"] = "YES"
-      config.build_settings["TVOS_DEPLOYMENT_TARGET"] = "12.0"
+      config.build_settings["TVOS_DEPLOYMENT_TARGET"] = "13.0"
       # convert ios to tvos target
       if config.build_settings["TARGETED_DEVICE_FAMILY"]
         config.build_settings["TARGETED_DEVICE_FAMILY"] = "3"
