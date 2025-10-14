@@ -181,8 +181,8 @@ We are not endorsed by or affiliated with Google LLC.
 [Jürgen Wölke](https://github.com/jwoelke), [Prikshit Chahar](https://github.com/pch28), [Andrei Lesnitsky](https://github.com/lesnitsky)  
 v2.0.4: [Aleksandr Denisov](https://github.com/DenisovAV), [Oleksandr Prokhorenko](https://github.com/minikin), [Maksim Nazaruk](https://github.com/MaksimNazaruk), [Andrei Kulbeda](https://github.com/qkul)  
 v2.10.3: [Aleksandr Denisov](https://github.com/DenisovAV), [Maksim Nazaruk](https://github.com/MaksimNazaruk), [Andrei Kulbeda](https://github.com/qkul)   
-v3.3.10: [Aleksandr Denisov](https://github.com/DenisovAV), [Andrei Kulbeda](https://github.com/qkul), [Jürgen Wölke](https://github.com/jwoelke)
-v3.10.6: [Eldar Pikunov](https://github.com/EPik-dev), [Jürgen Wölke](https://github.com/jwoelke)
-v3.13.8: not on GitHub
-v3.16.2: not on GitHub
+v3.3.10: [Aleksandr Denisov](https://github.com/DenisovAV), [Andrei Kulbeda](https://github.com/qkul), [Jürgen Wölke](https://github.com/jwoelke)  
+v3.10.6: [Eldar Pikunov](https://github.com/EPik-dev), [Jürgen Wölke](https://github.com/jwoelke)   
+v3.13.8: not on GitHub  
+v3.16.2: not on GitHub  
 v3.27.4: [Neelam Bansal](https://github.com/Neelambansal), [Nidhim Mathew](https://github.com/NidhinKoikkara), [Satnam Singh](https://github.com/NidhinKoikkara), [Jürgen Wölke](https://github.com/jwoelke)
