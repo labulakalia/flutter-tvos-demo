@@ -36,8 +36,9 @@ We are not endorsed by or affiliated with Google LLC.
       - https://github.com/flutter/engine    -->  https://github.com/LibertyGlobal/flutter-tvos-engine
       - https://dart.googlesource.com/sdk    --> https://github.com/LibertyGlobal/flutter-tvos-dart
       - https://skia.googlesource.com/skia   --> https://github.com/LibertyGlobal/flutter-tvos-skia
+      - https://github.com/google/perfetto --> https://github.com/LibertyGlobal/flutter-tvos-perfetto
     - Tested flutter engines: 
-        - 1.15, 1.19-candidate-4, 1.22-candidate.13, 1.26.0-17.6-pre, 2.0.4, 2.10.3, 3.3.10, 3.10.6
+        - 1.15, 1.19-candidate-4, 1.22-candidate.13, 1.26.0-17.6-pre, 2.0.4, 2.10.3, 3.3.10, 3.10.6, 3.13.8, 3.16.2, 3.27.4
 - Framework
   - No modifications in &quot;flutter&quot; tool (/framework)
   - Platform `tvos` not supported, `ios` target cannot be used because without modifications it would the use wrong SDK(ios) to compile the application
@@ -53,14 +54,15 @@ We are not endorsed by or affiliated with Google LLC.
 
 - Not all pods will compile. `ios` target is used and some API&#39;s are not supported by `tvos`. E.g. WebView
 - No debugging capabilities
-- No Apple TV look and feel widgets, no integration of virtual keyboard, ...
+- No Apple TV look and feel widgets, no integration of virtual keyboard (it is possible to create native view in the app for this), ...
 - Resource monitoring is not supported by tvos (using flutter tools)
  
 ## Known Issues
 - When a debug version is installed on a simulator or Apple TV device, then the app will not load when selected on screen. It will only load from the xcode debugger. This is not an issue for release builds. This has most likely to do with the fact that the app is trying to connect to 127.0.0.1 which is not started because the flutter tools are not used.
 
 ## Supported devices
-- Apple tvOS 12.0 or later
+- 3.27.4: minimum tvOS 13.0
+- older versions: minimum tvOS 12.0
 
 ## Workarounds
 
@@ -81,7 +83,7 @@ We are not endorsed by or affiliated with Google LLC.
     {
       "managed": False,
       "name": "src/flutter",
-      "url": "git@github.com:LibertyGlobal/flutter-tvos-engine.git@3.10.6",
+      "url": "git@github.com:LibertyGlobal/flutter-tvos-engine.git@3.27.4",
       "custom_deps": {},
       "deps_file": "DEPS",
       "safesync_url": "",
@@ -91,7 +93,7 @@ We are not endorsed by or affiliated with Google LLC.
 
 - Run `gclient sync` in `engine` directory
 - See flutter wiki for Java SKD and &#39;ant&#39; dependencies
-- Install &quot;flutter&quot; version `3.10.6` ([https://flutter.dev/docs/get-started/install/macos](https://flutter.dev/docs/get-started/install/macos))
+- Install &quot;flutter&quot; version `3.27.4` ([https://flutter.dev/docs/get-started/install/macos](https://flutter.dev/docs/get-started/install/macos))
 
 ## Compiling the engine
 
@@ -131,6 +133,20 @@ We are not endorsed by or affiliated with Google LLC.
   - alternatively run: `sed -i '' "s#FLUTTER_LOCAL_ENGINE[[:space:]]=[[:space:]].*;#FLUTTER_LOCAL_ENGINE = \"${FLUTTER_LOCAL_ENGINE}\";#g" Runner.xcodeproj/project.pbxproj`
 - Build app for device debug, simulator or archive (see switching target below)
 
+## Notes
+- Accessibility  (only supported from 3.27.4 onwards)
+  - Voice over: 
+    - Only navigation mode is supported
+    - Only tested our applications, might not work for all use cases
+    - Only widgets Application must include "semantics" classes, these must be focusable and the focused one must have the is focused flag set!
+      - Note: this is not specific for tvOS and is also required for Android TV
+    - See "accessibility_bridge.mm"
+    - Limitations / known issues:  
+      - "Explorer" mode is not working and behaves as "navigation" mode
+      - "item chooser" mode is not working properly
+      - Navigation focus rectangle is sometimes flashing a few times when the element is focused  
+      - Navigation focus rectangle is sometimes not visible (also seen in system UI)
+
 ## Common issues
 - Engine
   - 3.3.10: in case compilation of `libpng.pngread.o` fails. Replace `src/third_party/libpng/pngread.c` with file [pngread.c](./patches/pngread.c) from [patches](./patches) folder
@@ -158,8 +174,8 @@ We are not endorsed by or affiliated with Google LLC.
     - Copy to be used framework (See above)
     - Build / Archive
   - Distribution / Validation in Organizer fails
-    - Check if both `ios_deployment_target` & `MinimumOSVersion` in the engine and app match. Both must be `12.0`!
-      - The `info.plist` file is copied from the engine to the `flutter.framework` folder and contains `12.0` 
+    - Check if both `ios_deployment_target` & `MinimumOSVersion` in the engine and app match. Both must be `13.0`!
+      - The `info.plist` file is copied from the engine to the `flutter.framework` folder and contains `13.0` 
 
 ## Contributors
 [Jürgen Wölke](https://github.com/jwoelke), [Prikshit Chahar](https://github.com/pch28), [Andrei Lesnitsky](https://github.com/lesnitsky)  
@@ -167,3 +183,6 @@ v2.0.4: [Aleksandr Denisov](https://github.com/DenisovAV), [Oleksandr Prokhorenk
 v2.10.3: [Aleksandr Denisov](https://github.com/DenisovAV), [Maksim Nazaruk](https://github.com/MaksimNazaruk), [Andrei Kulbeda](https://github.com/qkul)   
 v3.3.10: [Aleksandr Denisov](https://github.com/DenisovAV), [Andrei Kulbeda](https://github.com/qkul), [Jürgen Wölke](https://github.com/jwoelke)
 v3.10.6: [Eldar Pikunov](https://github.com/EPik-dev), [Jürgen Wölke](https://github.com/jwoelke)
+v3.13.8: not on GitHub
+v3.16.2: not on GitHub
+v3.27.4: [Neelam Bansal](https://github.com/Neelambansal), [Nidhim Mathew](https://github.com/NidhinKoikkara), [Satnam Singh](https://github.com/NidhinKoikkara), [Jürgen Wölke](https://github.com/jwoelke)

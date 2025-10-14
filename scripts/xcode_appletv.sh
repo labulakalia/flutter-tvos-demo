@@ -24,19 +24,27 @@ BuildAppDebug() {
 
   HOST_TOOLS=$FLUTTER_LOCAL_ENGINE/out/host_debug_unopt$TARGET_POSTFIX
   if [[ "$debug_sim" == "true" ]]; then
-    DEVICE_TOOLS=$FLUTTER_LOCAL_ENGINE/out/ios_debug_sim_unopt$TARGET_POSTFIX/clang$CLANG_POSTFIX
+    DEVICE_TOOLS=$FLUTTER_LOCAL_ENGINE/out/ios_debug_sim_unopt$TARGET_POSTFIX
   else
-    DEVICE_TOOLS=$FLUTTER_LOCAL_ENGINE/out/ios_debug_unopt$TARGET_POSTFIX/clang$CLANG_POSTFIX
+    DEVICE_TOOLS=$FLUTTER_LOCAL_ENGINE/out/ios_debug_unopt$TARGET_POSTFIX
+  fi
+
+  if [[ $(uname -m) == "arm64" ]]; then
+    GEN_SNAPSHOT=$DEVICE_TOOLS/gen_snapshot$TARGET_POSTFIX
+  else
+    GEN_SNAPSHOT=$DEVICE_TOOLS/clang$CLANG_POSTFIX/gen_snapshot
   fi
 
   ROOTDIR=$(dirname "$PROJECT_DIR")
   OUTDIR=$ROOTDIR/build/ios/Release-iphoneos
   mkdir -p $OUTDIR
+  echo " └─OUTDIR: $OUTDIR"
+  echo " └─BUILT_PRODUCTS_DIR: $BUILT_PRODUCTS_DIR"
+ 
 
-
-  echo " └─Coping Flutter.framework"
+  echo " └─Copying Flutter.framework"
   rm -rf "$OUTDIR/Flutter.framework"
-  cp -R "$DEVICE_TOOLS/../Flutter.framework" "$OUTDIR"
+  cp -R "$DEVICE_TOOLS/Flutter.framework" "$OUTDIR"
 
 
   tvos_deployment_target="$TVOS_DEPLOYMENT_TARGET"
@@ -46,10 +54,10 @@ BuildAppDebug() {
 #  cp -v -R "$PROJECT_DIR/tvos_flutter_assets/flutter_assets" "$OUTDIR/App.framework"
 
 
-  echo " └─Compiling kernal"
+  echo " └─Compiling kernel"
 
-  "$HOST_TOOLS/dart" \
-    "$HOST_TOOLS/gen/frontend_server.dart.snapshot" \
+  "$HOST_TOOLS/dart-sdk/bin/dartaotruntime" \
+    "$HOST_TOOLS/gen/frontend_server_aot.dart.snapshot" \
     --sdk-root "$HOST_TOOLS/flutter_patched_sdk" \
     --tfa --target=flutter \
     -DTV_MODE=ON \
@@ -60,18 +68,18 @@ BuildAppDebug() {
 
   echo " └─Compiling JIT Snapshot"
 
-  "$DEVICE_TOOLS/gen_snapshot" --deterministic \
+  "$GEN_SNAPSHOT" \
+    --deterministic \
     --enable-asserts \
-    --lazy_async_stacks \
     --isolate_snapshot_instructions="$OUTDIR/isolate_snapshot_instr" \
     --snapshot_kind=app-jit \
-    --load_vm_snapshot_data="$DEVICE_TOOLS/../gen/flutter/lib/snapshot/vm_isolate_snapshot.bin" \
-    --load_isolate_snapshot_data="$DEVICE_TOOLS/../gen/flutter/lib/snapshot/isolate_snapshot.bin" \
+    --load_vm_snapshot_data="$DEVICE_TOOLS/gen/flutter/lib/snapshot/vm_isolate_snapshot.bin" \
+    --load_isolate_snapshot_data="$DEVICE_TOOLS/gen/flutter/lib/snapshot/isolate_snapshot.bin" \
     --isolate_snapshot_data="$OUTDIR/App.framework/flutter_assets/isolate_snapshot_data" \
     --isolate_snapshot_instructions="$OUTDIR/App.framework/flutter_assets/isolate_snapshot_instr" \
     "$OUTDIR/App.framework/flutter_assets/kernel_blob.bin"
 
-  cp "$DEVICE_TOOLS/../gen/flutter/lib/snapshot/vm_isolate_snapshot.bin" "$OUTDIR/App.framework/flutter_assets/vm_snapshot_data"
+  cp "$DEVICE_TOOLS/gen/flutter/lib/snapshot/vm_isolate_snapshot.bin" "$OUTDIR/App.framework/flutter_assets/vm_snapshot_data"
 
 
   if [[ "$debug_sim" == "true" ]]; then
@@ -87,7 +95,6 @@ BuildAppDebug() {
     echo "static const int Moo = 88;" | xcrun clang -x c \
       -arch $SIM_ARCH \
       -L"$SYSROOT/usr/lib" \
-      -lSystem \
       -isysroot "$SYSROOT" \
       -mappletvsimulator-version-min=$tvos_deployment_target \
       -dynamiclib \
@@ -131,15 +138,21 @@ BuildAppDebug() {
 BuildAppRelease() {
 
   HOST_TOOLS=$FLUTTER_LOCAL_ENGINE/out/host_release$TARGET_POSTFIX
-  DEVICE_TOOLS=$FLUTTER_LOCAL_ENGINE/out/ios_release$TARGET_POSTFIX/clang$CLANG_POSTFIX
+  DEVICE_TOOLS=$FLUTTER_LOCAL_ENGINE/out/ios_release$TARGET_POSTFIX
+
+  if [[ $(uname -m) == "arm64" ]]; then
+    GEN_SNAPSHOT=$DEVICE_TOOLS/gen_snapshot$TARGET_POSTFIX
+  else
+    GEN_SNAPSHOT=$DEVICE_TOOLS/clang$CLANG_POSTFIX/gen_snapshot
+  fi
 
   ROOTDIR=$(dirname "$PROJECT_DIR")
   OUTDIR=$ROOTDIR/build/ios/Release-iphoneos
   mkdir -p $OUTDIR
 
-  echo " └─Coping Flutter.framework"
+  echo " └─Copying Flutter.framework"
   rm -rf "$OUTDIR/Flutter.framework"
-  cp -R "$DEVICE_TOOLS/../Flutter.framework" "$OUTDIR"
+  cp -R "$DEVICE_TOOLS/Flutter.framework" "$OUTDIR"
 
   tvos_deployment_target="$TVOS_DEPLOYMENT_TARGET"
 
@@ -147,10 +160,10 @@ BuildAppRelease() {
 #  mkdir -p "$OUTDIR/App.framework/flutter_assets"
 #  cp -R "$PROJECT_DIR/tvos_flutter_assets/flutter_assets" "$OUTDIR/App.framework"
 
-  echo " └─Compiling kernal"
+  echo " └─Compiling kernel"
 
-  "$HOST_TOOLS/dart" -v \
-    "$HOST_TOOLS/gen/frontend_server.dart.snapshot" \
+ "$HOST_TOOLS/dart-sdk/bin/dartaotruntime" \
+    "$HOST_TOOLS/gen/frontend_server_aot.dart.snapshot" \
     --sdk-root "$HOST_TOOLS/flutter_patched_sdk" \
     --aot --tfa --target=flutter \
     -DTARGET_PLATFORM=TVOS \
@@ -159,10 +172,12 @@ BuildAppRelease() {
 
   echo " └─Compiling AOT Assembly"
 
-  "$DEVICE_TOOLS/gen_snapshot" \
+  "$GEN_SNAPSHOT" \
     --deterministic \
     --snapshot_kind=app-aot-assembly \
-    --assembly=$OUTDIR/snapshot_assembly.S $OUTDIR/app.dill
+    --assembly=$OUTDIR/snapshot_assembly.S \
+    --strip \
+    $OUTDIR/app.dill
 
 
   echo " └─Compiling Assembly"
@@ -177,10 +192,11 @@ BuildAppRelease() {
 
   echo " └─Linking app"
 
-  clang -v -arch arm64 \
+  clang -arch arm64 \
     -isysroot "$SYSROOT" \
     -mtvos-version-min=$tvos_deployment_target \
-    -dynamiclib -Xlinker -rpath -Xlinker @executable_path/Frameworks \
+    -dynamiclib \
+    -Xlinker -rpath -Xlinker @executable_path/Frameworks \
     -Xlinker -rpath -Xlinker @loader_path/Frameworks \
     -install_name @rpath/App.framework/App \
     -o "$OUTDIR/App.framework/App" \
@@ -210,7 +226,7 @@ BuildApp() {
   
   local build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
   
-  echo "Compling /Flutter/App.Framework"
+  echo "Compiling Flutter/App.Framework"
  
   if [ -z "$FLUTTER_LOCAL_ENGINE" ]; then
     echo " └─ERROR: FLUTTER_LOCAL_ENGINE not set!" 

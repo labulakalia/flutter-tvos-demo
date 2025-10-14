@@ -23,20 +23,20 @@ fi
 
 if [ "$1" == "release" ]; then
 	echo "Coping Flutter.framework (release)..."
-	DEVICE_TOOLS=$FLUTTER_LOCAL_ENGINE/out/ios_release$TARGET_POSTFIX/clang$CLANG_POSTFIX
+	DEVICE_TOOLS=$FLUTTER_LOCAL_ENGINE/out/ios_release$TARGET_POSTFIX
 elif [[ "$1" == "debug_sim" ]] ; then
 	echo "Coping Flutter.framework (debug-simulator)..."
-	DEVICE_TOOLS=$FLUTTER_LOCAL_ENGINE/out/ios_debug_sim_unopt$TARGET_POSTFIX/clang$CLANG_POSTFIX
+	DEVICE_TOOLS=$FLUTTER_LOCAL_ENGINE/out/ios_debug_sim_unopt$TARGET_POSTFIX
 else
 	#debug
 	echo "Coping Flutter.framework (debug)..."
-	DEVICE_TOOLS=$FLUTTER_LOCAL_ENGINE/out/ios_debug_unopt$TARGET_POSTFIX/clang$CLANG_POSTFIX
+	DEVICE_TOOLS=$FLUTTER_LOCAL_ENGINE/out/ios_debug_unopt$TARGET_POSTFIX
 fi
 
 
 OUTDIR=$PWD/Flutter
 
 rm -rf "$OUTDIR/Flutter.framework"
-cp -R "$DEVICE_TOOLS/../Flutter.framework" "$OUTDIR"
+cp -R "$DEVICE_TOOLS/Flutter.framework" "$OUTDIR"
 
 
