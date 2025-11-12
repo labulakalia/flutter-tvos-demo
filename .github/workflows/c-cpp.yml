@@ -1,0 +1,35 @@
+name: engine sync
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: sync
+      run: |
+        git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+        export PATH=$PATH:$(pwd)/depot_tools
+        mkdir engine && cd engine
+        cat > .gclient << EOF
+solutions = [
+  {
+    "managed": False,
+    "name": "src/flutter",
+    "url": "https://github.com/LibertyGlobal/flutter-tvos-engine.git@3.27.4",
+    "custom_deps": {},
+    "deps_file": "DEPS",
+    "safesync_url": "",
+  },
+]
+EOF
+        gclient sync
+        
+        
